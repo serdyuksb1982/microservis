@@ -11,6 +11,7 @@ import ru.serdyuk.micro.planner.entity.Task;
 import ru.serdyuk.micro.planner.todo.search.TaskSearchValues;
 import ru.serdyuk.micro.planner.todo.service.TaskService;
 import ru.serdyuk.micro.planner.utils.resttemplate.UserRestBuilder;
+import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
 
 import java.text.ParseException;
 import java.util.Calendar;
@@ -25,11 +26,13 @@ public class TaskController {
     public static final String ID_COLUMN = "id";
     private final TaskService taskService;
 
-    private final UserRestBuilder userRestBuilder;
+    private UserRestBuilder userRestBuilder;
 
-    public TaskController(TaskService taskService, UserRestBuilder userRestBuilder) {
+    private final UserWebClientBuilder userWebClientBuilder;
+
+    public TaskController(TaskService taskService, UserWebClientBuilder userWebClientBuilder) {
         this.taskService = taskService;
-        this.userRestBuilder = userRestBuilder;
+        this.userWebClientBuilder = userWebClientBuilder;
     }
 
     //получение всех данных
@@ -50,7 +53,7 @@ public class TaskController {
             return new ResponseEntity("missed param: title", HttpStatus.NOT_ACCEPTABLE);
         }
 
-        if (userRestBuilder.userExists(task.getUserId())) {
+        if (userWebClientBuilder.userExists(task.getUserId())) {
             return ResponseEntity.ok(taskService.add(task));
         }
 

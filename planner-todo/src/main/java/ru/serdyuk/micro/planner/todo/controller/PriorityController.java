@@ -7,6 +7,7 @@ import ru.serdyuk.micro.planner.entity.Priority;
 import ru.serdyuk.micro.planner.todo.search.PrioritySearchValues;
 import ru.serdyuk.micro.planner.todo.service.PriorityService;
 import ru.serdyuk.micro.planner.utils.resttemplate.UserRestBuilder;
+import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,11 +26,13 @@ public class PriorityController {
 
     private final PriorityService priorityService;
 
-    private final UserRestBuilder userRestBuilder;
+    private UserRestBuilder userRestBuilder;
 
-    public PriorityController(PriorityService priorityService, UserRestBuilder userRestBuilder) {
+    private final UserWebClientBuilder userWebClientBuilder;
+
+    public PriorityController(PriorityService priorityService, UserWebClientBuilder userWebClientBuilder) {
         this.priorityService = priorityService;
-        this.userRestBuilder = userRestBuilder;
+        this.userWebClientBuilder = userWebClientBuilder;
     }
 
     @PostMapping("/all")
@@ -49,7 +52,7 @@ public class PriorityController {
             return new ResponseEntity("missed param: title must be null...", HttpStatus.NOT_ACCEPTABLE);
         }
 
-        if (userRestBuilder.userExists(priority.getUserId())) {
+        if (userWebClientBuilder.userExists(priority.getUserId())) {
             return ResponseEntity.ok(priorityService.add(priority));
         }
 
