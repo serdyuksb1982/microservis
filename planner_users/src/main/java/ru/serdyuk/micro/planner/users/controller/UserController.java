@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.serdyuk.micro.planner.entity.User;
 import ru.serdyuk.micro.planner.users.search.UserSearchValues;
 import ru.serdyuk.micro.planner.users.service.UserService;
+import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
 
 import java.text.ParseException;
 import java.util.NoSuchElementException;
@@ -23,9 +24,11 @@ public class UserController {
     private final UserService userService;
 
 
+    public final UserWebClientBuilder userWebClientBuilder;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder) {
         this.userService = userService;
+        this.userWebClientBuilder = userWebClientBuilder;
     }
 
 
@@ -46,6 +49,19 @@ public class UserController {
         if (user.getUsername() == null || user.getUsername().trim().length() == 0) {
             return new ResponseEntity("missed param: userName", HttpStatus.NOT_ACCEPTABLE);
         }
+
+        // adding user
+        user = userService.add(user);
+        if (user != null) {
+            // заполнение начальными данными пользователя (в параллельном потоке!!!!)
+            userWebClientBuilder.initUserDataLoading(user.getId()).subscribe(result -> {
+                System.out.println("user populated: " + result);
+            });
+            return ResponseEntity.ok(user);
+        }
+
+
+
         return ResponseEntity.ok(userService.add(user));
     }
 
