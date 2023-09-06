@@ -8,6 +8,7 @@ import ru.serdyuk.micro.planner.entity.Category;
 import ru.serdyuk.micro.planner.todo.search.CategorySearchValues;
 import ru.serdyuk.micro.planner.todo.service.CategoryService;
 import ru.serdyuk.micro.planner.utils.resttemplate.UserRestBuilder;
+import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,11 +19,13 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    private final UserRestBuilder userRestBuilder;
+    private UserRestBuilder userRestBuilder;
 
-    public CategoryController(CategoryService categoryService, UserRestBuilder userRestBuilder) {
+    private final UserWebClientBuilder userWebClientBuilder;
+
+    public CategoryController(CategoryService categoryService, UserWebClientBuilder userWebClientBuilder) {
         this.categoryService = categoryService;
-        this.userRestBuilder = userRestBuilder;
+        this.userWebClientBuilder = userWebClientBuilder;
     }
 
     @PostMapping("/all")
@@ -42,7 +45,7 @@ public class CategoryController {
             return new ResponseEntity("missed param: title must be null...", HttpStatus.NOT_ACCEPTABLE);
         }
 
-        if (userRestBuilder.userExists(category.getUserId())) {
+        if (userWebClientBuilder.userExists(category.getUserId())) {
             return ResponseEntity.ok(categoryService.add(category));
         }
         return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);
