@@ -2,6 +2,7 @@ package ru.serdyuk.micro.planner.utils.webclient;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import ru.serdyuk.micro.planner.entity.User;
 
 @Component
@@ -26,5 +27,16 @@ public class UserWebClientBuilder {
             exception.printStackTrace();
         }
         return false;
+    }
+
+    //Async
+    public Flux<User> userExistsAsync(Long userId) {
+        Flux<User> fluxUser = WebClient.create(baseUrl)
+                .post()
+                .uri("id")
+                .bodyValue(userId)
+                .retrieve()
+                .bodyToFlux(User.class);
+        return fluxUser;
     }
 }
