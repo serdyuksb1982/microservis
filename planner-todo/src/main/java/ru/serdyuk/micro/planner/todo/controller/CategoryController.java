@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.serdyuk.micro.planner.entity.Category;
+import ru.serdyuk.micro.planner.entity.User;
 import ru.serdyuk.micro.planner.todo.feign.UserFeignClient;
 import ru.serdyuk.micro.planner.todo.search.CategorySearchValues;
 import ru.serdyuk.micro.planner.todo.service.CategoryService;
@@ -59,8 +60,15 @@ public class CategoryController {
         // подписка на результат
         /*userWebClientBuilder.userExistsAsync(category.getUserId()).subscribe(user -> System.out.println("user = " + user));
         return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);*/
+        // вызов мс через feign interface
 
-        if (userFeignClient.findUserById(category.getUserId()) != null) {
+        ResponseEntity<User> result = userFeignClient.findUserById(category.getUserId());
+
+        if (result == null) {
+            return new ResponseEntity("система пользователей недоступна, попробуйте позже!", HttpStatus.NOT_FOUND);
+        }
+
+        if (result.getBody() != null) { //если current User не пустой
             return ResponseEntity.ok(categoryService.add(category));
         }
         return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);
