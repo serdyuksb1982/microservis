@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.serdyuk.micro.planner.entity.Category;
+import ru.serdyuk.micro.planner.todo.feign.UserFeignClient;
 import ru.serdyuk.micro.planner.todo.search.CategorySearchValues;
 import ru.serdyuk.micro.planner.todo.service.CategoryService;
 import ru.serdyuk.micro.planner.utils.resttemplate.UserRestBuilder;
@@ -19,14 +20,19 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    private UserRestBuilder userRestBuilder;
+    private final UserRestBuilder userRestBuilder;
 
     private final UserWebClientBuilder userWebClientBuilder;
 
-    public CategoryController(CategoryService categoryService, UserWebClientBuilder userWebClientBuilder) {
+    private final UserFeignClient userFeignClient;
+
+    public CategoryController(CategoryService categoryService, UserRestBuilder userRestBuilder, UserWebClientBuilder userWebClientBuilder, UserFeignClient userFeignClient) {
         this.categoryService = categoryService;
+        this.userRestBuilder = userRestBuilder;
         this.userWebClientBuilder = userWebClientBuilder;
+        this.userFeignClient = userFeignClient;
     }
+
 
     @PostMapping("/all")
     public List<Category> findAll(@RequestBody Long userId) {
@@ -45,14 +51,19 @@ public class CategoryController {
             return new ResponseEntity("missed param: title must be null...", HttpStatus.NOT_ACCEPTABLE);
         }
 
-        if (userWebClientBuilder.userExists(category.getUserId())) {
+        /*if (userWebClientBuilder.userExists(category.getUserId())) {
             return ResponseEntity.ok(categoryService.add(category));
         }
-        return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);
+        return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);*/
 
         // подписка на результат
         /*userWebClientBuilder.userExistsAsync(category.getUserId()).subscribe(user -> System.out.println("user = " + user));
         return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);*/
+
+        if (userFeignClient.findUserById(category.getUserId()) != null) {
+            return ResponseEntity.ok(categoryService.add(category));
+        }
+        return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);
     }
 
     @PutMapping("/update")
