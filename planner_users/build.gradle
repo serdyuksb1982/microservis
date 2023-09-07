@@ -15,9 +15,6 @@ repositories {
     mavenCentral()
 }
 
-repositories {
-    mavenCentral()
-}
 ext {
     set('springCloudVersion', "2021.0.0")
 }
@@ -32,6 +29,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'ru.serdyuk.micro.planner:planner-entity'
     implementation 'ru.serdyuk.micro.planner:planner-utils'
+    implementation 'org.springframework.boot:spring-cloud-starter-stream-rabbit'
+
     runtimeOnly 'org.postgresql:postgresql'
 }
 
