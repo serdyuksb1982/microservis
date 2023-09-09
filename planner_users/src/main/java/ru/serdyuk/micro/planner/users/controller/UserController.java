@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.serdyuk.micro.planner.entity.User;
+import ru.serdyuk.micro.planner.users.mq.MessageProducer;
 import ru.serdyuk.micro.planner.users.search.UserSearchValues;
 import ru.serdyuk.micro.planner.users.service.UserService;
 import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
@@ -23,12 +24,14 @@ public class UserController {
     public static final String ID_COLUMN = "id";
     private final UserService userService;
 
-
     public final UserWebClientBuilder userWebClientBuilder;
 
-    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder) {
+    public final MessageProducer messageProducer;
+
+    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder, MessageProducer messageProducer) {
         this.userService = userService;
         this.userWebClientBuilder = userWebClientBuilder;
+        this.messageProducer = messageProducer;
     }
 
 
@@ -52,17 +55,20 @@ public class UserController {
 
         // adding user
         user = userService.add(user);
-        if (user != null) {
+        /*if (user != null) {
             // заполнение начальными данными пользователя (в параллельном потоке!!!!)
             userWebClientBuilder.initUserDataLoading(user.getId()).subscribe(result -> {
                 System.out.println("user populated: " + result);
             });
             return ResponseEntity.ok(user);
+        }*/
+
+        if (user != null) {// если пользователь добавился
+            messageProducer.initUserData(user.getId());//отправляем сообщение в канале
+
         }
 
-
-
-        return ResponseEntity.ok(userService.add(user));
+        return ResponseEntity.ok(user);
     }
 
     // получение объекта по id
