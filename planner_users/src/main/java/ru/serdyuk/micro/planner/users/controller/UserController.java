@@ -152,9 +152,16 @@ public class UserController {
         Integer pageNumber = userSearchValues.getPageNumber() != null ? userSearchValues.getPageNumber() : null;
         Integer pageSize = userSearchValues.getPageSize() != null ? userSearchValues.getPageSize() : null;
 
-        Sort.Direction direction = sortDirection == null || sortDirection.trim().length() == 0 || sortDirection.trim().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort.Direction direction = sortDirection == null
+                || sortDirection.trim().length() == 0
+                || sortDirection.trim().equals("asc")
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-        Sort sort = Sort.by(direction, sortColumn, ID_COLUMN);
+        Sort sort = Sort.by(
+                direction,
+                sortColumn,
+                ID_COLUMN
+        );
 
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
 

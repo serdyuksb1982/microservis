@@ -6,8 +6,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-@EnableBinding(UserTodoBinding.class)
-//Класс отправки сообщений
+@EnableBinding(UserTodoBinding.class)//Класс отправки сообщений
 public class MessageProducer {
 
     private final UserTodoBinding userTodoBinding;

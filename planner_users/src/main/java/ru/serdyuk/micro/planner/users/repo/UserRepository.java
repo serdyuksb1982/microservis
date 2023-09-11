@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE " +
             "(:email is null or :email='' or lower(u.email) like lower(concat('%', :email, '%') ) ) " +
             // and - означает выборку обоих условий (email and username), or - один из двух параметров
-            "and " +
+            "or " +
             "(:username is null or :username='' or lower(u.username) like lower(concat('%', :username, '%') ) )"
     )
     Page<User> findByParams(@Param("email") String email,
