@@ -1,56 +1,37 @@
-package ru.serdyuk.micro.planner.entity;
+package ru.serdyuk.micro.planner.entity
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*
+import javax.persistence.*
 
 @Entity
 @Table(name = "user_data", schema = "users", catalog = "user")
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter@Setter
-public class User {
-
+class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String email;
-
-    private String username;
+    val id: Long? = null
+    val email: String? = null
+    val username: String? = null
 
     @Column(name = "userpassword")
-    private String password;
+    val password: String? = null
 
-    @ManyToMany(mappedBy = "users")
+    /*@ManyToMany(mappedBy = "users")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Set<Role> roles;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id.equals(user.id);
+    val roles: Set<Role>? = null*/
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (o == null || javaClass != o.javaClass) return false
+        val user = o as User
+        return id == user.id
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    override fun hashCode(): Int {
+        return Objects.hash(id)
     }
 
-    @Override
-    public String toString() {
+    override fun toString(): String {
         return "User{" +
                 "username='" + username + '\'' +
-                '}';
+                '}'
     }
 }

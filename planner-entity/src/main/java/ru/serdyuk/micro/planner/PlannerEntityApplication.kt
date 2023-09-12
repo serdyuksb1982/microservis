@@ -1,13 +1,11 @@
-package ru.serdyuk.micro.planner;
+package ru.serdyuk.micro.planner
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
 
 @SpringBootApplication
-public class PlannerEntityApplication {
+class PlannerEntityApplication
 
-    public static void main(String[] args) {
-        SpringApplication.run(PlannerEntityApplication.class, args);
+    fun main(args: Array<String>) {
+        runApplication<PlannerEntityApplication>(*args)
     }
-
-}

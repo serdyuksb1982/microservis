@@ -1,61 +1,41 @@
-package ru.serdyuk.micro.planner.entity;
+package ru.serdyuk.micro.planner.entity
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Objects;
+import java.io.Serializable
+import java.util.*
+import javax.persistence.*
 
 @Entity
 @Table(name = "category", schema = "todo", catalog = "planner-todo")
-@NoArgsConstructor
-@AllArgsConstructor
-@Setter
-@Getter
-@Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Category implements Serializable {
-
+class Category : Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     Long id;
-
-     String title;
+    var id: Long? = null
+    var title: String? = null
 
     @Column(name = "completed_count", updatable = false)
-    private Long completedCount;
+    val completedCount: Long? = null
 
     @Column(name = "uncompleted_count", updatable = false)
-    private Long uncompletedCount;
+    val uncompletedCount: Long? = null
 
     /*@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;*/
-
     @Column(name = "user_id")
-    private Long userId;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Category category = (Category) o;
-        return id.equals(category.id);
+    val userId: Long? = null
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (o == null || javaClass != o.javaClass) return false
+        val category = o as Category
+        return id == category.id
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    override fun hashCode(): Int {
+        return Objects.hash(id)
     }
 
-    @Override
-    public String toString() {
-        return title;
+    override fun toString(): String {
+        return title!!
     }
 }
