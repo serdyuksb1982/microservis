@@ -12,9 +12,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @ComponentScan(basePackages = ["ru.serdyuk.micro.planner"])
 @EnableJpaRepositories(basePackages = ["ru.serdyuk.micro.planner.users"])
 @RefreshScope //позволяет динамически изменять состав бина - из файлов конфигурации, в процессе использования
-open class PlannerUsersApplication {
+class PlannerUsersApplication
 
     fun main(args: Array<String>) {
         runApplication<PlannerUsersApplication>(*args)
     }
-}

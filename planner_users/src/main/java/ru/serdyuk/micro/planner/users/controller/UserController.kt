@@ -1,172 +1,144 @@
-package ru.serdyuk.micro.planner.users.controller;
+package ru.serdyuk.micro.planner.users.controller
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.serdyuk.micro.planner.entity.User;
-import ru.serdyuk.micro.planner.users.mq.func.MessageFuncActions;
-import ru.serdyuk.micro.planner.users.search.UserSearchValues;
-import ru.serdyuk.micro.planner.users.service.UserService;
-import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
-
-import java.text.ParseException;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import ru.serdyuk.micro.planner.entity.User
+import ru.serdyuk.micro.planner.users.mq.func.MessageFuncActions
+import ru.serdyuk.micro.planner.users.search.UserSearchValues
+import ru.serdyuk.micro.planner.users.service.UserService
+import java.text.ParseException
 
 @RestController
 @RequestMapping("/user")
-public class UserController {
-
-    public static final String ID_COLUMN = "id";
-    private final UserService userService;
-
-    public UserWebClientBuilder userWebClientBuilder;
-
-    public MessageFuncActions messageFuncActions;
-
-    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder, MessageFuncActions messageFuncActions) {
-        this.userService = userService;
-        this.userWebClientBuilder = userWebClientBuilder;
-        this.messageFuncActions = messageFuncActions;
+class UserController(
+    private val userService: UserService,
+    var messageFuncActions: MessageFuncActions
+) {
+    // static const
+    companion object {
+        const val ID_COLUMN = "id" //имя столбца id
     }
-
 
     // add user
     @PostMapping("/add")
-    public ResponseEntity<User> add(@RequestBody User user) {
+    fun add(@RequestBody user: User): ResponseEntity<Any> {
         //проверка на обязательные параметры
-        if (user.getId() != null && user.getId() != 0) {
+        if (user.id != null && user.id != 0L) {
             // id создается автоинкрементально автоматически JPA
-            return new ResponseEntity("redundant param: id MUST be null", HttpStatus.NOT_ACCEPTABLE);
+            return ResponseEntity<Any>("redundant param: id MUST be null", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.getEmail() == null || user.getEmail().trim().length() == 0) {
-            return new ResponseEntity("missed param: email", HttpStatus.NOT_ACCEPTABLE);
+        if (user.email == null || user.email.trim().isEmpty()) {
+            return ResponseEntity<Any>("missed param: email", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.getPassword() == null || user.getPassword().trim().length() == 0) {
-            return new ResponseEntity("missed param: password", HttpStatus.NOT_ACCEPTABLE);
+        if (user.password == null || user.password.trim().isEmpty()) {
+            return ResponseEntity<Any>("missed param: password", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.getUsername() == null || user.getUsername().trim().length() == 0) {
-            return new ResponseEntity("missed param: userName", HttpStatus.NOT_ACCEPTABLE);
+        if (user.username == null || user.username.trim().isEmpty()) {
+            return ResponseEntity<Any>("missed param: userName", HttpStatus.NOT_ACCEPTABLE)
         }
 
         // adding user
-        user = userService.add(user);
-        /*if (user != null) {
-            // заполнение начальными данными пользователя (в параллельном потоке!!!!)
-            userWebClientBuilder.initUserDataLoading(user.getId()).subscribe(result -> {
-                System.out.println("user populated: " + result);
-            });
-            return ResponseEntity.ok(user);
-        }*/
+        val tmpUser = userService.add(user)
+        // отправляем сообщение в очередь для генерации тестовых данных асинхронно!!!
+            messageFuncActions.sendNewUserMessage(tmpUser.id)
 
-       /* if (user != null) {// если пользователь добавился
-            messageProducer.initUserData(user.getId());}*/
-        if (user != null) {
-            messageFuncActions.sendNewUserMessage(user.getId());
-        }
-
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(tmpUser)
     }
 
     // получение объекта по id
     @PostMapping("/id")
-    public ResponseEntity<User> findById(@RequestBody Long id) {
-        Optional<User> userOptional = userService.findById(id);//получаем контейнер Optional
+    fun findById(@RequestBody id: Long): ResponseEntity<Any> {
+        val userOptional = userService.findById(id) //получаем контейнер Optional
         try {
-            if (userOptional.isPresent()) {//если объект существует в контейнере, то получаем его методом get()
-                return ResponseEntity.ok(userOptional.get());
+            if (userOptional.isPresent) { //если объект существует в контейнере, то получаем его методом get()
+                return ResponseEntity.ok(userOptional.get())
             }
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-
+        } catch (e: NoSuchElementException) {
+            e.printStackTrace()
         }
-        return new ResponseEntity("id=" + id + " not found", HttpStatus.NOT_ACCEPTABLE);
+        return ResponseEntity<Any>("id=$id not found", HttpStatus.NOT_ACCEPTABLE)
     }
 
+    // обновление записи
     @PutMapping("/update")
-    public ResponseEntity<User> update(@RequestBody User user) {
-        if (user.getId() == null || user.getId() == 0) {
-            return new ResponseEntity("missed param: id", HttpStatus.NOT_ACCEPTABLE);
+    fun update(@RequestBody user: User): ResponseEntity<Any> {
+        if (user.id == null || user.id == 0L) {
+            return ResponseEntity<Any>("missed param: id", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.getEmail() == null || user.getEmail().trim().length() == 0) {
-            return new ResponseEntity("missed param: email", HttpStatus.NOT_ACCEPTABLE);
+        if (user.email == null || user.email.trim().isEmpty()) {
+            return ResponseEntity<Any>("missed param: email", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.getPassword() == null || user.getPassword().trim().length() == 0) {
-            return new ResponseEntity("missed param: password", HttpStatus.NOT_ACCEPTABLE);
+        if (user.password == null || user.password.trim().isEmpty()) {
+            return ResponseEntity<Any>("missed param: password", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.getUsername() == null || user.getUsername().trim().length() == 0) {
-            return new ResponseEntity("missed param: user name", HttpStatus.NOT_ACCEPTABLE);
+        if (user.username == null || user.username.trim().isEmpty()) {
+            ResponseEntity<Any>("missed param: user name", HttpStatus.NOT_ACCEPTABLE)
         }
-        return ResponseEntity.ok(userService.update(user));
+        //save работает как на добавление, так и на обновление данных
+        userService.update(user)
+        return ResponseEntity<Any>(HttpStatus.OK)
     }
 
     @PostMapping("/deletebyid")
-    public ResponseEntity deleteByUserId(@RequestBody Long userId) {
+    fun deleteByUserId(@RequestBody userId: Long): ResponseEntity<Any> {
         try {
-            userService.deleteByUserId(userId);
-        } catch (EmptyResultDataAccessException exception) {
-            exception.printStackTrace();
-            return new ResponseEntity("userId=" + userId + " not found", HttpStatus.NOT_ACCEPTABLE);
+            userService.deleteByUserId(userId)
+        } catch (exception: EmptyResultDataAccessException) {
+            exception.printStackTrace()
+            return ResponseEntity<Any>("userId=$userId not found", HttpStatus.NOT_ACCEPTABLE)
         }
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity<Any>(HttpStatus.OK)
     }
 
     @PostMapping("/deletebyemail")
-    public ResponseEntity deleteByUserEmail(@RequestBody String email) {
+    fun deleteByUserEmail(@RequestBody email: String): ResponseEntity<Any> {
         try {
-            userService.deleteByEmail(email);
-        } catch (EmptyResultDataAccessException exception) {
-            exception.printStackTrace();
-            return new ResponseEntity("email=" + email + " not found", HttpStatus.NOT_ACCEPTABLE);
+            userService.deleteByEmail(email)
+        } catch (exception: EmptyResultDataAccessException) {
+            exception.printStackTrace()
+            return ResponseEntity<Any>("email=$email not found", HttpStatus.NOT_ACCEPTABLE)
         }
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity<Any>(HttpStatus.OK)
     }
 
     @PostMapping("/email")
-    public ResponseEntity<User> findByEmail(@RequestBody String email) {
-        User user = userService.findByEmail(email);
-        if (user == null || user.getEmail().trim().length() == 0) {
-            return new ResponseEntity("missed param: email=" + email + " not found", HttpStatus.NOT_ACCEPTABLE);
-        }
-
-        return new ResponseEntity(user, HttpStatus.OK);
+    fun findByEmail(@RequestBody email: String): ResponseEntity<Any> {
+        val user = userService.findByEmail(email)
+        return if (user == null || user.email.trim().isEmpty()) {
+            ResponseEntity<Any>("missed param: email=$email not found", HttpStatus.NOT_ACCEPTABLE)
+        } else ResponseEntity<Any>(user, HttpStatus.OK)
     }
 
     @PostMapping("/search")
-    public ResponseEntity<Page<User>> search(@RequestBody UserSearchValues userSearchValues) throws ParseException {
+    @Throws(ParseException::class)
+    fun search(@RequestBody userSearchValues: UserSearchValues): ResponseEntity<Any> {
+        // все заполненные условия проверяются условием ИЛИ
+        // можно передавать не полный емайл, а любой текст для поиска
+        val email = userSearchValues.email
 
-        String email = userSearchValues.getEmail() != null ? userSearchValues.getEmail() : null;
 
-        String username = userSearchValues.getUsername() != null ? userSearchValues.getUsername() : null;
 
-        /*if (email == null || email.trim().length() == 0) {
-            return new ResponseEntity("missed param: user email", HttpStatus.NOT_ACCEPTABLE);
-        }*/
-
-        String sortColumn = userSearchValues.getSortColumn() != null ? userSearchValues.getSortColumn() : null;
-        String sortDirection = userSearchValues.getSortDirection() != null ? userSearchValues.getSortDirection() : null;
-
-        Integer pageNumber = userSearchValues.getPageNumber();
-        Integer pageSize = userSearchValues.getPageSize();
-
-        Sort.Direction direction = sortDirection == null
-                || sortDirection.trim().length() == 0
-                || sortDirection.trim().equals("asc")
-                ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        Sort sort = Sort.by(
-                direction,
-                sortColumn,
-                ID_COLUMN
-        );
-
-        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
-
-        Page<User> result = userService.findByParams(email, username, pageRequest);
-        return ResponseEntity.ok(result);
+        val sortColumn = userSearchValues.sortColumn
+        val sortDirection = userSearchValues.sortDirection
+        val pageNumber = userSearchValues.pageNumber
+        val pageSize = userSearchValues.pageSize
+        //TODO внимание! здесь возможен nullPointerException!!, для этого используем ЭЛВИС-Оператор
+        val username = userSearchValues.username ?: "" // "Элвис" оператор, если username null, присвоется пустое значение
+        // направление сортировки
+        val direction = if (sortDirection.trim().isEmpty() || sortDirection.trim() == "asc") Sort.Direction.ASC else Sort.Direction.DESC
+        // объект сортировки, который содержит столбец и направление
+        val sort = Sort.by(direction, sortColumn, ID_COLUMN)
+        // объект постраничного отображения
+        val pageRequest = PageRequest.of(pageNumber, pageSize, sort)
+        // результат запроса с постраничным выводом
+        val result = userService.findByParams(email, username, pageRequest)
+        return ResponseEntity.ok(result)
     }
+
+
 }
