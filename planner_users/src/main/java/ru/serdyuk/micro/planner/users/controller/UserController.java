@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.serdyuk.micro.planner.entity.User;
 import ru.serdyuk.micro.planner.users.mq.func.MessageFuncActions;
-import ru.serdyuk.micro.planner.users.mq.legacy.MessageProducer;
 import ru.serdyuk.micro.planner.users.search.UserSearchValues;
 import ru.serdyuk.micro.planner.users.service.UserService;
 import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
@@ -25,14 +24,14 @@ public class UserController {
     public static final String ID_COLUMN = "id";
     private final UserService userService;
 
-    public final UserWebClientBuilder userWebClientBuilder;
+    public UserWebClientBuilder userWebClientBuilder;
 
-    public final MessageFuncActions messageProducerService;
+    public MessageFuncActions messageFuncActions;
 
-    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder, MessageFuncActions messageProducerService) {
+    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder, MessageFuncActions messageFuncActions) {
         this.userService = userService;
         this.userWebClientBuilder = userWebClientBuilder;
-        this.messageProducerService = messageProducerService;
+        this.messageFuncActions = messageFuncActions;
     }
 
 
@@ -66,7 +65,9 @@ public class UserController {
 
        /* if (user != null) {// если пользователь добавился
             messageProducer.initUserData(user.getId());}*/
-        messageProducerService.sendNewUserMessage(user.getId());
+        if (user != null) {
+            messageFuncActions.sendNewUserMessage(user.getId());
+        }
 
         return ResponseEntity.ok(user);
     }
@@ -149,8 +150,8 @@ public class UserController {
         String sortColumn = userSearchValues.getSortColumn() != null ? userSearchValues.getSortColumn() : null;
         String sortDirection = userSearchValues.getSortDirection() != null ? userSearchValues.getSortDirection() : null;
 
-        Integer pageNumber = userSearchValues.getPageNumber() != null ? userSearchValues.getPageNumber() : null;
-        Integer pageSize = userSearchValues.getPageSize() != null ? userSearchValues.getPageSize() : null;
+        Integer pageNumber = userSearchValues.getPageNumber();
+        Integer pageSize = userSearchValues.getPageSize();
 
         Sort.Direction direction = sortDirection == null
                 || sortDirection.trim().length() == 0

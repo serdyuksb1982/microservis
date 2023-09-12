@@ -33,6 +33,8 @@ dependencies {
     implementation 'ru.serdyuk.micro.planner:planner-entity'
     implementation 'ru.serdyuk.micro.planner:planner-utils'
     runtimeOnly 'org.postgresql:postgresql'
+    //from kotlin jdk
+    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 dependencyManagement {
@@ -40,3 +42,4 @@ dependencyManagement {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
+

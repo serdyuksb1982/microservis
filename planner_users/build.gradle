@@ -2,6 +2,11 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '2.6.2'
     id 'io.spring.dependency-management' version '1.1.3'
+    // kotlin plugins
+    id 'org.jetbrains.kotlin.jvm' version '1.7.10'
+    id "org.jetbrains.kotlin.plugin.spring" version "1.7.10"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.7.10"
+    id "org.jetbrains.kotlin.plugin.allopen" version "1.7.10"
 }
 
 group = 'ru.serdyuk.micro.planner'
@@ -30,12 +35,21 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'ru.serdyuk.micro.planner:planner-entity'
     implementation 'ru.serdyuk.micro.planner:planner-utils'
-
+    // DB Driver
     runtimeOnly 'org.postgresql:postgresql'
+    // kotlin in spring application integration
+    implementation ("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation ("org.jetbrains.kotlin:kotlin-reflect")
+    implementation ("com.fasterxml.jackson.module:jackson-module-kotlin")
 }
 
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
