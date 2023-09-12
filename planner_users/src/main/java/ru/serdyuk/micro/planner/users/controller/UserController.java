@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.serdyuk.micro.planner.entity.User;
-import ru.serdyuk.micro.planner.users.mq.MessageProducer;
+import ru.serdyuk.micro.planner.users.mq.func.MessageFuncActions;
+import ru.serdyuk.micro.planner.users.mq.legacy.MessageProducer;
 import ru.serdyuk.micro.planner.users.search.UserSearchValues;
 import ru.serdyuk.micro.planner.users.service.UserService;
 import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
@@ -26,12 +27,12 @@ public class UserController {
 
     public final UserWebClientBuilder userWebClientBuilder;
 
-    public final MessageProducer messageProducer;
+    public final MessageFuncActions messageProducerService;
 
-    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder, MessageProducer messageProducer) {
+    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder, MessageFuncActions messageProducerService) {
         this.userService = userService;
         this.userWebClientBuilder = userWebClientBuilder;
-        this.messageProducer = messageProducer;
+        this.messageProducerService = messageProducerService;
     }
 
 
@@ -63,10 +64,9 @@ public class UserController {
             return ResponseEntity.ok(user);
         }*/
 
-        if (user != null) {// если пользователь добавился
-            messageProducer.initUserData(user.getId());//отправляем сообщение в канале
-
-        }
+       /* if (user != null) {// если пользователь добавился
+            messageProducer.initUserData(user.getId());}*/
+        messageProducerService.sendNewUserMessage(user.getId());
 
         return ResponseEntity.ok(user);
     }

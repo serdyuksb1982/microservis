@@ -1,7 +1,6 @@
 package ru.serdyuk.micro.planner.todo.service;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.serdyuk.micro.planner.entity.Category;
 import ru.serdyuk.micro.planner.entity.Priority;
 import ru.serdyuk.micro.planner.entity.Task;
@@ -9,13 +8,11 @@ import ru.serdyuk.micro.planner.entity.Task;
 import java.util.Calendar;
 import java.util.Date;
 
-@Component
+@Service
 public class TestDataService {
 
     private final TaskService taskService;
-
     private final PriorityService priorityService;
-
     private final CategoryService categoryService;
 
     public TestDataService(TaskService taskService, PriorityService priorityService, CategoryService categoryService) {
