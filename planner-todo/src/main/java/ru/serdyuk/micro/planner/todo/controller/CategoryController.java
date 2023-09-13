@@ -21,16 +21,11 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    private final UserRestBuilder userRestBuilder;
-
-    private final UserWebClientBuilder userWebClientBuilder;
 
     private final UserFeignClient userFeignClient;
 
-    public CategoryController(CategoryService categoryService, UserRestBuilder userRestBuilder, UserWebClientBuilder userWebClientBuilder, UserFeignClient userFeignClient) {
+    public CategoryController(CategoryService categoryService, UserFeignClient userFeignClient) {
         this.categoryService = categoryService;
-        this.userRestBuilder = userRestBuilder;
-        this.userWebClientBuilder = userWebClientBuilder;
         this.userFeignClient = userFeignClient;
     }
 
@@ -104,7 +99,7 @@ public class CategoryController {
     // поиск по любым параметрам CategorySearchValues
     @PostMapping("/search")
     public ResponseEntity<List<Category>> search(@RequestBody CategorySearchValues categorySearchValues) {
-        if (categorySearchValues.getUserId() == null || categorySearchValues.getUserId() == 0) {
+        if (categorySearchValues.getUserId() == 0) {
             return new ResponseEntity("missed param: user Id", HttpStatus.NOT_ACCEPTABLE);
         }
         // поиск категорий пользователя по названию

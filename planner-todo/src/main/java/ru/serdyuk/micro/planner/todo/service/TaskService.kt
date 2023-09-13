@@ -1,46 +1,46 @@
-package ru.serdyuk.micro.planner.todo.service;
+package ru.serdyuk.micro.planner.todo.service
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import ru.serdyuk.micro.planner.entity.Task;
-import ru.serdyuk.micro.planner.todo.repo.TaskRepository;
-
-import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.List;
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.stereotype.Service
+import ru.serdyuk.micro.planner.entity.Task
+import ru.serdyuk.micro.planner.todo.repo.TaskRepository
+import java.util.*
+import javax.transaction.Transactional
 
 @Service
 @Transactional
-public class TaskService {
-
-    private final TaskRepository taskRepository;
-
-    public TaskService(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+class TaskService(private val taskRepository: TaskRepository) {
+    fun findAll(userId: Long): List<Task> {
+        return taskRepository.findByUserIdOrderByTitleAsc(userId)
     }
 
-    public List<Task> findAll(Long userId) {
-        return taskRepository.findByUserIdOrderByTitleAsc(userId);
+    fun add(task: Task): Task {
+        return taskRepository.save(task)
     }
 
-    public Task add(Task task) {
-        return taskRepository.save(task);
+    fun update(task: Task): Task {
+        return taskRepository.save(task)
     }
 
-    public Task update(Task task) {
-        return taskRepository.save(task);
+    fun deleteById(id: Long) {
+        taskRepository.deleteById(id)
     }
 
-    public void deleteById(Long id) {
-        taskRepository.deleteById(id);
+    fun findByParams(
+        text: String?,
+        completed: Boolean?,
+        priorityId: Long?,
+        categoryId: Long?,
+        userId: Long,
+        dateFrom: Date?,
+        dateTo: Date?,
+        paging: PageRequest
+    ): Page<Task> {
+        return taskRepository.findByParams(text, completed, priorityId, categoryId, userId, dateFrom, dateTo, paging)
     }
 
-    public Page<Task> findByParams(String text, Boolean completed, Long priorityId, Long categoryId, Long userId, Date dateFrom, Date dateTo, PageRequest paging) {
-        return taskRepository.findByParams(text, completed, priorityId, categoryId, userId, dateFrom, dateTo, paging);
-    }
-
-    public Task findById(Long id) {
-        return taskRepository.findById(id).get();
+    fun findById(id: Long): Task {
+        return taskRepository.findById(id).get()
     }
 }

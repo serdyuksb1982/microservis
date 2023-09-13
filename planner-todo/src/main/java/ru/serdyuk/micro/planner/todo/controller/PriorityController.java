@@ -25,9 +25,6 @@ import java.util.NoSuchElementException;
 public class PriorityController {
 
     private final PriorityService priorityService;
-
-    private UserRestBuilder userRestBuilder;
-
     private final UserWebClientBuilder userWebClientBuilder;
 
     public PriorityController(PriorityService priorityService, UserWebClientBuilder userWebClientBuilder) {
@@ -89,7 +86,7 @@ public class PriorityController {
     // поиск по любым параметрам PrioritySearchValues
     @PostMapping("/search")
     public ResponseEntity<List<Priority>> search(@RequestBody PrioritySearchValues prioritySearchValues) {
-        if (prioritySearchValues.getUserId() == null || prioritySearchValues.getUserId() == 0) {
+        if (prioritySearchValues.getUserId() == 0) {
             return new ResponseEntity("missed param: email", HttpStatus.NOT_ACCEPTABLE);
         }
         // поиск категорий пользователя по названию

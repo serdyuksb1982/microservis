@@ -1,44 +1,34 @@
-package ru.serdyuk.micro.planner.todo.service;
+package ru.serdyuk.micro.planner.todo.service
 
-import org.springframework.stereotype.Service;
-import ru.serdyuk.micro.planner.entity.Category;
-import ru.serdyuk.micro.planner.todo.repo.CategoryRepository;
-
-import javax.transaction.Transactional;
-import java.util.List;
+import org.springframework.stereotype.Service
+import ru.serdyuk.micro.planner.entity.Category
+import ru.serdyuk.micro.planner.todo.repo.CategoryRepository
+import javax.transaction.Transactional
 
 @Service
 @Transactional
-public class CategoryService {
-
-    private final CategoryRepository categoryRepository;
-
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+class CategoryService(private val categoryRepository: CategoryRepository) {
+    fun findAll(userId: Long): List<Category> {
+        return categoryRepository.findByUserIdOrderByTitleAsc(userId)
     }
 
-
-    public List<Category> findAll(Long userId) {
-        return categoryRepository.findByUserIdOrderByTitleAsc(userId);
+    fun add(category: Category): Category {
+        return categoryRepository.save(category) //save обновляет или создает новый объект, если его не было
     }
 
-    public Category add(Category category) {
-        return categoryRepository.save(category);//save обновляет или создает новый объект, если его не было
+    fun update(category: Category): Category {
+        return categoryRepository.save(category)
     }
 
-    public Category update(Category category) {
-        return categoryRepository.save(category);
+    fun deleteById(id: Long) {
+        categoryRepository.deleteById(id)
     }
 
-    public void deleteById(Long id) {
-        categoryRepository.deleteById(id);
+    fun findByTitle(text: String?, userId: Long): List<Category> {
+        return categoryRepository.findByTitles(text, userId)
     }
 
-    public List<Category> findByTitle(String text, Long userId) {
-        return categoryRepository.findByTitles(text, userId);
-    }
-
-    public Category findById(Long id) {
-        return categoryRepository.findById(id).get();
+    fun findById(id: Long): Category {
+        return categoryRepository.findById(id).get()
     }
 }

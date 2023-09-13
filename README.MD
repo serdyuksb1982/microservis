@@ -30,4 +30,4 @@ install Rabbitmq from Windows:
 * choco install rabbitmq
 * проверить -> http://localhost:15672/ login=guest password=guest
 --------------------
-## Перевод java-code на Kotlin
+## Перевод java-code на Kotlin (в Intellij Idea сочетание клавиш: Alt+Ctrl+Shift+K)
