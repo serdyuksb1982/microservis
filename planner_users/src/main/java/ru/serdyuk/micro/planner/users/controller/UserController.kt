@@ -32,20 +32,24 @@ class UserController(
             // id создается автоинкрементально автоматически JPA
             return ResponseEntity<Any>("redundant param: id MUST be null", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.email == null || user.email.trim().isEmpty()) {
+        if (user.email == null || user.email!!.trim().isEmpty()) {
             return ResponseEntity<Any>("missed param: email", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.password == null || user.password.trim().isEmpty()) {
+        if (user.password == null || user.password!!.trim().isEmpty()) {
             return ResponseEntity<Any>("missed param: password", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.username == null || user.username.trim().isEmpty()) {
+        if (user.username == null || user.username!!.trim().isEmpty()) {
             return ResponseEntity<Any>("missed param: userName", HttpStatus.NOT_ACCEPTABLE)
         }
 
         // adding user
+
         val tmpUser = userService.add(user)
         // отправляем сообщение в очередь для генерации тестовых данных асинхронно!!!
-            messageFuncActions.sendNewUserMessage(tmpUser.id)
+        if (tmpUser.id != null) {
+            messageFuncActions.sendNewUserMessage(tmpUser.id!!)
+        }
+
 
         return ResponseEntity.ok(tmpUser)
     }
@@ -70,13 +74,13 @@ class UserController(
         if (user.id == null || user.id == 0L) {
             return ResponseEntity<Any>("missed param: id", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.email == null || user.email.trim().isEmpty()) {
+        if (user.email == null || user.email!!.trim().isEmpty()) {
             return ResponseEntity<Any>("missed param: email", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.password == null || user.password.trim().isEmpty()) {
+        if (user.password == null || user.password!!.trim().isEmpty()) {
             return ResponseEntity<Any>("missed param: password", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (user.username == null || user.username.trim().isEmpty()) {
+        if (user.username == null || user.username!!.trim().isEmpty()) {
             ResponseEntity<Any>("missed param: user name", HttpStatus.NOT_ACCEPTABLE)
         }
         //save работает как на добавление, так и на обновление данных
@@ -109,7 +113,7 @@ class UserController(
     @PostMapping("/email")
     fun findByEmail(@RequestBody email: String): ResponseEntity<Any> {
         val user = userService.findByEmail(email)
-        return if (user == null || user.email.trim().isEmpty()) {
+        return if (user == null || user.email!!.trim().isEmpty()) {
             ResponseEntity<Any>("missed param: email=$email not found", HttpStatus.NOT_ACCEPTABLE)
         } else ResponseEntity<Any>(user, HttpStatus.OK)
     }
@@ -120,8 +124,6 @@ class UserController(
         // все заполненные условия проверяются условием ИЛИ
         // можно передавать не полный емайл, а любой текст для поиска
         val email = userSearchValues.email
-
-
 
         val sortColumn = userSearchValues.sortColumn
         val sortDirection = userSearchValues.sortDirection
@@ -139,6 +141,4 @@ class UserController(
         val result = userService.findByParams(email, username, pageRequest)
         return ResponseEntity.ok(result)
     }
-
-
 }
