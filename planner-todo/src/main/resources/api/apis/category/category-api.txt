@@ -5,7 +5,7 @@
        "title": "Test 03.09.2023",
        "userId": "1234"
    }
-// response ->
+// response -> 200 ОК
     {
         "id": 1,
         "title": "Test 03.09.2023",

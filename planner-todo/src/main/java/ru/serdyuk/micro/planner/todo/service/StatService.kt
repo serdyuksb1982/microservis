@@ -8,7 +8,7 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class StatService(private val repository: StatRepository) {
-    fun findStat(userId: Long): Stat {
+    fun findStat(userId: Long): Stat? {
         return repository.findByUserId(userId)
     }
 }

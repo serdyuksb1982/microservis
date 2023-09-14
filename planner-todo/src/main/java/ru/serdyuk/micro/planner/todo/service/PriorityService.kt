@@ -8,7 +8,7 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class PriorityService(private val priorityRepository: PriorityRepository) {
-    fun findAll(userId: Long?): List<Priority> {
+    fun findAll(userId: Long): List<Priority> {
         return priorityRepository.findByUserIdOrderByTitleAsc(userId)
     }
 
@@ -24,7 +24,7 @@ class PriorityService(private val priorityRepository: PriorityRepository) {
         priorityRepository.deleteById(id)
     }
 
-    fun find(text: String?, userId: Long?): List<Priority> {
+    fun find(text: String?, userId: Long): List<Priority> {
         return priorityRepository.findByTitle(text, userId)
     }
 

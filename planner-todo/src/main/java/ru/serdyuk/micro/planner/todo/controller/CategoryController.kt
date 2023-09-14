@@ -1,50 +1,37 @@
-package ru.serdyuk.micro.planner.todo.controller;
+package ru.serdyuk.micro.planner.todo.controller
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.serdyuk.micro.planner.entity.Category;
-import ru.serdyuk.micro.planner.entity.User;
-import ru.serdyuk.micro.planner.todo.feign.UserFeignClient;
-import ru.serdyuk.micro.planner.todo.search.CategorySearchValues;
-import ru.serdyuk.micro.planner.todo.service.CategoryService;
-import ru.serdyuk.micro.planner.utils.resttemplate.UserRestBuilder;
-import ru.serdyuk.micro.planner.utils.webclient.UserWebClientBuilder;
-
-import java.util.List;
-import java.util.NoSuchElementException;
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import ru.serdyuk.micro.planner.entity.Category
+import ru.serdyuk.micro.planner.todo.feign.UserFeignClient
+import ru.serdyuk.micro.planner.todo.search.CategorySearchValues
+import ru.serdyuk.micro.planner.todo.service.CategoryService
 
 @RestController
 @RequestMapping("/category")
-public class CategoryController {
-
-    private final CategoryService categoryService;
-
-
-    private final UserFeignClient userFeignClient;
-
-    public CategoryController(CategoryService categoryService, UserFeignClient userFeignClient) {
-        this.categoryService = categoryService;
-        this.userFeignClient = userFeignClient;
-    }
-
+class CategoryController(
+    private val categoryService: CategoryService,
+    @Qualifier("ru.serdyuk.micro.planner.todo.feign.UserFeignClient") private val userFeignClient: UserFeignClient
+    ) {
 
     @PostMapping("/all")
-    public List<Category> findAll(@RequestBody Long userId) {
-        return categoryService.findAll(userId);
+    fun findAll(@RequestBody userId: Long): List<Any> {
+        return categoryService.findAll(userId)
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Category> add(@RequestBody Category category) {
+    fun add(@RequestBody category: Category): ResponseEntity<Any> {
         // проверка на обязательные параметры
-        if (category.getId() != null && category.getId() != 0) {
+        if (category.id != null && category.id != 0L) {
             // id создается автоматически в БД (autoincrement), поэтому его передавать не нужно, иначе может быть ошибка
-            return new ResponseEntity("redundant param: id MUST be null", HttpStatus.NOT_ACCEPTABLE);
+            return ResponseEntity<Any>("redundant param: id MUST be null", HttpStatus.NOT_ACCEPTABLE)
         }
         // если передали пустое значение title
-        if (category.getTitle() == null || category.getTitle().trim().length() == 0) {
-            return new ResponseEntity("missed param: title must be null...", HttpStatus.NOT_ACCEPTABLE);
+        if (category.title == null || category.title!!.trim().isEmpty()) {
+            return ResponseEntity<Any>("missed param: title must be null...", HttpStatus.NOT_ACCEPTABLE)
         }
 
         /*if (userWebClientBuilder.userExists(category.getUserId())) {
@@ -56,66 +43,62 @@ public class CategoryController {
         /*userWebClientBuilder.userExistsAsync(category.getUserId()).subscribe(user -> System.out.println("user = " + user));
         return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);*/
         // вызов мс через feign interface
-
-        ResponseEntity<User> result = userFeignClient.findUserById(category.getUserId());
-
-        if (result == null) {
-            return new ResponseEntity("система пользователей недоступна, попробуйте позже!", HttpStatus.NOT_FOUND);
-        }
-
-        if (result.getBody() != null) { //если current User не пустой
-            return ResponseEntity.ok(categoryService.add(category));
-        }
-        return new  ResponseEntity("user id=" + category.getUserId() + " not found", HttpStatus.NOT_ACCEPTABLE);
+        val userResponseEntity = userFeignClient.findUserById(category.userId!!) ?: return ResponseEntity<Any>(
+                "система пользователей недоступна, попробуйте позже!",
+                HttpStatus.NOT_FOUND
+            )
+        return if (userResponseEntity.body != null) { //если response не пустой
+            ResponseEntity.ok(categoryService.add(category))
+        } else ResponseEntity<Any>("user id=" + category.userId + " not found", HttpStatus.NOT_ACCEPTABLE)
     }
 
     @PutMapping("/update")
-    public ResponseEntity update(@RequestBody Category category) {
+    fun update(@RequestBody category: Category): ResponseEntity<Any> {
         //
-        if (category.getId() == null || category.getId() == 0){
-            return new ResponseEntity("missed param: id", HttpStatus.NOT_ACCEPTABLE);
+        if (category.id == null || category.id == 0L) {
+            return ResponseEntity<Any>("missed param: id", HttpStatus.NOT_ACCEPTABLE)
         }
-        if (category.getTitle() == null || category.getTitle().trim().length() == 0) {
-            return new ResponseEntity("missed param: title", HttpStatus.NOT_ACCEPTABLE);
+        if (category.title == null || category.title!!.trim().isEmpty()) {
+            return ResponseEntity<Any>("missed param: title", HttpStatus.NOT_ACCEPTABLE)
         }
-        categoryService.update(category);
-        return new ResponseEntity(HttpStatus.OK);
+        categoryService.update(category)
+        return ResponseEntity<Any>(HttpStatus.OK)
     }
 
     // для удаления используем тип запроса delete и передаем id для удаеления
     // можно также использовать метод post и передавать id в теле запроса
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity delete(@PathVariable("id") Long id) {
+    fun delete(@PathVariable("id") id: Long): ResponseEntity<Any> {
         //можно обойтись и без try-catch, тогда будет возвращаться полная ошибка
         try {
-            categoryService.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            e.printStackTrace();
-            return new ResponseEntity("id=" + id + " not found", HttpStatus.NOT_ACCEPTABLE);
+            categoryService.deleteById(id)
+        } catch (e: EmptyResultDataAccessException) {
+            e.printStackTrace()
+            return ResponseEntity<Any>("id=$id not found", HttpStatus.NOT_ACCEPTABLE)
         }
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity<Any>(HttpStatus.OK)
     }
 
     // поиск по любым параметрам CategorySearchValues
     @PostMapping("/search")
-    public ResponseEntity<List<Category>> search(@RequestBody CategorySearchValues categorySearchValues) {
-        if (categorySearchValues.getUserId() == 0) {
-            return new ResponseEntity("missed param: user Id", HttpStatus.NOT_ACCEPTABLE);
+    fun search(@RequestBody categorySearchValues: CategorySearchValues): ResponseEntity<Any> {
+        if (categorySearchValues.userId == 0L) {
+            return ResponseEntity<Any>("missed param: user Id", HttpStatus.NOT_ACCEPTABLE)
         }
         // поиск категорий пользователя по названию
-        List<Category> list = categoryService.findByTitle(categorySearchValues.getTitle(), categorySearchValues.getUserId());
-        return ResponseEntity.ok(list);
+        val list = categoryService.findByTitle(categorySearchValues.title, categorySearchValues.userId)
+        return ResponseEntity.ok(list)
     }
 
     @PostMapping("/id")
-    public ResponseEntity<Category> findById(@RequestBody Long id) {
-        Category category = null;
-        try {
-            category = categoryService.findById(id);
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-            return new ResponseEntity("id=" + id + " not found", HttpStatus.NOT_ACCEPTABLE);
+    fun findById(@RequestBody id: Long): ResponseEntity<Any> {
+
+        val category: Category? = try {
+            categoryService.findById(id)
+        } catch (e: NoSuchElementException) {
+            e.printStackTrace()
+            return ResponseEntity<Any>("id=$id not found", HttpStatus.NOT_ACCEPTABLE)
         }
-        return ResponseEntity.ok(category);
+        return ResponseEntity.ok(category)
     }
 }
