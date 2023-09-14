@@ -1,51 +1,42 @@
-package ru.serdyuk.micro.planner.todo.feign;
+package ru.serdyuk.micro.planner.todo.feign
 
-import com.google.common.io.CharStreams;
-import feign.Response;
-import feign.codec.ErrorDecoder;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.charset.Charset;
+import com.google.common.io.CharStreams
+import feign.Response
+import feign.codec.ErrorDecoder
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Component
+import org.springframework.web.server.ResponseStatusException
+import java.io.IOException
+import java.io.Reader
+import java.nio.charset.Charset
 
 @Component
-public class FeignExceptionHandler implements ErrorDecoder {
-
-    @Override
-    public Exception decode(String methodKey, Response response) {
-
-        switch (response.status()) {
-            case 406: {
-                return new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, readMessage(response));
+class FeignExceptionHandler : ErrorDecoder {
+    override fun decode(methodKey: String, response: Response): Exception? {
+        when (response.status()) {
+            406 -> {
+                return ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, readMessage(response))
             }
         }
-
-        return null;
+        return null
     }
 
     // метод получения текста ошибки в формате String из потока
-    private String readMessage(Response response) {
-        String message = null;
-        Reader reader = null;
-
+    private fun readMessage(response: Response): String? {
+        var message: String? = null
+        var reader: Reader? = null
         try {
-            reader = response.body().asReader(Charset.defaultCharset());
-            message = CharStreams.toString(reader);
-        } catch (IOException exception) {
-            exception.printStackTrace();
+            reader = response.body().asReader(Charset.defaultCharset())
+            message = CharStreams.toString(reader)
+        } catch (exception: IOException) {
+            exception.printStackTrace()
         } finally {
             try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException exception) {
-                exception.printStackTrace();
+                reader?.close()
+            } catch (exception: IOException) {
+                exception.printStackTrace()
             }
         }
-        return message;
+        return message
     }
-
 }
