@@ -1,8 +1,8 @@
 package ru.serdyuk.micro.planner.todo.mq.legacy;
 
 
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
+//import org.springframework.cloud.stream.annotation.EnableBinding;
+//import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.stereotype.Component;
 import ru.serdyuk.micro.planner.todo.service.TestDataService;
 

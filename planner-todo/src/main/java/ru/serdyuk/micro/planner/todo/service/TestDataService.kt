@@ -1,5 +1,7 @@
 package ru.serdyuk.micro.planner.todo.service
 
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.annotation.KafkaListeners
 import org.springframework.stereotype.Service
 import ru.serdyuk.micro.planner.entity.Category
 import ru.serdyuk.micro.planner.entity.Priority
@@ -12,6 +14,13 @@ class TestDataService(
     private val priorityService: PriorityService,
     private val categoryService: CategoryService
 ) {
+
+    @KafkaListener(topics = ["sergey-sb"])
+    fun listenKafka(userId: Long) {
+        println("new userId =$userId")
+        initTestData(userId)
+    }
+
     fun initTestData(userId: Long) {
         val prior1 = Priority()
         prior1.color = "#fff"

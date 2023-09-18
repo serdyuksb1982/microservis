@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.*
 import ru.serdyuk.micro.planner.entity.User
 import ru.serdyuk.micro.planner.users.mq.func.MessageFuncActions
@@ -17,12 +18,16 @@ import java.text.ParseException
 @RequestMapping("/user")
 class UserController(
     private val userService: UserService,
-    var messageFuncActions: MessageFuncActions
+    //var messageFuncActions: MessageFuncActions
+    private val kafkaTemplate: KafkaTemplate<String, Long>
 ) {
     // static const
     companion object {
         const val ID_COLUMN = "id" //имя столбца id
+        const val TOPIC_NAME: String = "sergey-sb"
     }
+
+
 
     // add user
     @PostMapping("/add")
@@ -47,7 +52,8 @@ class UserController(
         val tmpUser = userService.add(user)
         // отправляем сообщение в очередь для генерации тестовых данных асинхронно!!!
         if (tmpUser.id != null) {
-            messageFuncActions.sendNewUserMessage(tmpUser.id!!)
+           // messageFuncActions.sendNewUserMessage(tmpUser.id!!)
+            kafkaTemplate.send(TOPIC_NAME, tmpUser.id)
         }
 
 

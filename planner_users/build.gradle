@@ -27,7 +27,9 @@ ext {
 dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit:+'
+    // AMQP component: rabbit or kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+    //implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit:+'
     //для считывания конфигурации из репозитория в гите
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

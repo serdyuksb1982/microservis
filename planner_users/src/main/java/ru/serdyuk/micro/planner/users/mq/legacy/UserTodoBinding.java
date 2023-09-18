@@ -1,6 +1,6 @@
 package ru.serdyuk.micro.planner.users.mq.legacy;
 
-import org.springframework.cloud.stream.annotation.Output;
+//import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.messaging.MessageChannel;
 
 public interface UserTodoBinding {
