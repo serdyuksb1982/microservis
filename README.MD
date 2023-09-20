@@ -60,7 +60,7 @@ install Rabbitmq from Windows:
       * установить -> в zookeeper dataDir=C:/tmp/kafka_2.13-3.5.0/data/zoo (обратить внимание на "слеш");
       * установить -> в server log.dirs=C:/tmp/kafka_2.13-3.5.0/data/kafka
 ## Запуск:
-* Сначала запуск Zookeeper (Это инструмент-координатор, действует как общая служба конфигурации в системе.):
+<br> * Сначала запуск Zookeeper (Это инструмент-координатор, действует как общая служба конфигурации в системе.):
  * zookeeper-server-start.bat C:\tmp\kafka_2.13-3.5.0\config\zookeeper.properties
 * Запускаем сам Kafka server (в отдельном окне CMD):
  * kafka-server-start.bat C:\tmp\kafka_2.13-3.5.0\config\server.properties
